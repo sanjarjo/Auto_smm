@@ -15,10 +15,9 @@ def check_orders():
     for order_id, service_id in get_active_orders():
         r = check_status(order_id)
         status = r.get("status")
-
         if status == "completed":
             update_status(order_id, "completed")
             name = next(o["name"] for o in ORDERS if o["service_id"] == service_id)
             send_admin(f"✅ Bajarildi\n🛠 {name}\n🆔 {order_id}")
 
-    ensure_orders()
+    # ensure_orders() endi background loop ichida chaqiriladi
