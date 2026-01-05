@@ -13,28 +13,21 @@ CREATE TABLE IF NOT EXISTS orders (
 conn.commit()
 
 def save_order(order_id, service_id):
-    cur.execute(
-        "INSERT OR IGNORE INTO orders VALUES (?, ?, ?)",
-        (order_id, service_id, "pending")
-    )
+    cur.execute("INSERT OR IGNORE INTO orders VALUES (?,?,?)",
+                (order_id, service_id, "pending"))
     conn.commit()
 
 def update_status(order_id, status):
-    cur.execute(
-        "UPDATE orders SET status=? WHERE order_id=?",
-        (status, order_id)
-    )
+    cur.execute("UPDATE orders SET status=? WHERE order_id=?",
+                (status, order_id))
     conn.commit()
 
 def get_active_orders():
-    cur.execute(
-        "SELECT order_id, service_id FROM orders WHERE status!='completed'"
-    )
+    cur.execute("SELECT order_id, service_id FROM orders WHERE status!='completed'")
     return cur.fetchall()
 
-def has_active_order(service_id):
+def has_active(service_id):
     cur.execute(
         "SELECT COUNT(*) FROM orders WHERE service_id=? AND status!='completed'",
-        (service_id,)
-    )
+        (service_id,))
     return cur.fetchone()[0] > 0
