@@ -4,16 +4,11 @@ from telegram import Update
 from telegram.ext import Application
 from config import BOT_TOKEN, ADMIN_ID, WEBHOOK_URL, CHECK_INTERVAL
 from scheduler import check_orders, ensure_orders
+from notifier import init_notifier
 
 app = Flask(__name__)
 tg_app = Application.builder().token(BOT_TOKEN).build()
 loop = asyncio.get_event_loop()
-
-def send_admin(text):
-    asyncio.run_coroutine_threadsafe(
-        tg_app.bot.send_message(chat_id=ADMIN_ID, text=text),
-        loop
-    )
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -33,5 +28,9 @@ def start_bg():
 if __name__ == "__main__":
     loop.create_task(tg_app.initialize())
     loop.create_task(tg_app.bot.set_webhook(WEBHOOK_URL))
+
+    # 🔥 MUHIM QATOR
+    init_notifier(tg_app, loop, ADMIN_ID)
+
     start_bg()
     app.run(host="0.0.0.0", port=10000)
