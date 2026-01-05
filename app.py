@@ -1,21 +1,21 @@
 import asyncio
-import threading
 from telegram.ext import Application
 from config import BOT_TOKEN, ADMIN_ID, CHECK_INTERVAL
 from scheduler import check_orders, ensure_orders
 from notifier import init_notifier
+import threading
 
-# 🔹 Yangi event loop yaratish (Python 3.13 friendly)
+# 🔹 Yangi event loop yaratish
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
-# 🔹 Telegram bot (async Application)
+# 🔹 Telegram botni yaratish (polling uchun)
 tg_app = Application.builder().token(BOT_TOKEN).build()
 
 # 🔹 Notifierni init qilish
 init_notifier(tg_app, loop, ADMIN_ID)
 
-# 🔹 Background task: zakazlarni tekshirish
+# 🔹 Background zakazlar uchun thread
 def background_loop():
     ensure_orders()
     while True:
@@ -30,15 +30,11 @@ if __name__ == "__main__":
         # 🔹 Telegram initialize
         await tg_app.initialize()
 
-        # 🔹 Pollingni boshlash
-        await tg_app.start()
-        await tg_app.updater.start_polling()
-
-        # 🔹 Background threadni ishga tushirish
+        # 🔹 Background ishga tushirish
         start_bg()
 
-        # 🔹 Botni loopda ushlab turish
-        await tg_app.updater.wait_closed()
+        # 🔹 Pollingni ishga tushurish
+        await tg_app.run_polling()
 
-    # 🔹 Async loopni ishga tushurish
+    # 🔹 Loopni ishga tushirish
     loop.run_until_complete(main())
