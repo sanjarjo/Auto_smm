@@ -1,6 +1,8 @@
 BOT_TOKEN = "8410955320:AAEOMfM7p4bkL0kt6lnwPcraoYyNivXAfRU"
 ADMIN_ID = 7390469118
 
+WEBHOOK_URL = "https://auto-smm.onrender.com"
+
 SMM_API_URL = "https://uzbek-seen.uz/api/v2"
 SMM_API_KEY = "ed41d84b8121526616a0113c3a97bfad"
 
