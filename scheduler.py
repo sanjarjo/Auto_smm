@@ -1,7 +1,7 @@
 from smm_api import add_order, check_status
 from database import save_order, update_status, get_active_orders, has_active
 from config import ORDERS
-from app import send_admin
+from notifier import send_admin
 
 def ensure_orders():
     for cfg in ORDERS:
