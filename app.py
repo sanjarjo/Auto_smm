@@ -1,8 +1,8 @@
 import os
-from flask import Flask, request
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import asyncio
+from flask import Flask, request
+from telegram import Update, Bot
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 from config import BOT_TOKEN
 
@@ -20,12 +20,16 @@ application.add_handler(CommandHandler("start", start))
 @app.route(f"/webhook/{BOT_TOKEN}", methods=["POST"])
 def webhook():
     """Telegram POST requestlarini qabul qiladi"""
-    data = request.get_json(force=True)
-    update = Update.de_json(data, application.bot)
+    try:
+        data = request.get_json(force=True)
+        update = Update.de_json(data, application.bot)
 
-    # Synchronous tarzda update ni ishlatish
-    asyncio.run(application.process_update(update))
-    return "OK"
+        # asyncio run ishlatib synchronous tarzda update ni process qilamiz
+        asyncio.run(application.process_update(update))
+        return "OK"
+    except Exception as e:
+        print("Webhook error:", e)
+        return "Error", 500
 
 # Health check route
 @app.route("/")
