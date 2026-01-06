@@ -4,24 +4,38 @@ import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# Tokenni config.py dan import qilamiz
-from config import BOT_TOKEN
+from config import BOT_TOKEN, ADMIN_ID, CHECK_INTERVAL
+from scheduler import ensure_orders, check_orders
+from notifier import init_notifier
 
-# nest_asyncio bilan mavjud event loop ustida ishlashga ruxsat beramiz
+# nest_asyncio bilan Termux yoki boshqa existing event loop ustida ishlashga ruxsat
 nest_asyncio.apply()
 
 # /start komandasi
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ Salom! Bot ishga tushdi!")
 
+# Background task: SMM zakazlarini tekshirish va qo'shish
+async def background_loop(application):
+    while True:
+        try:
+            ensure_orders()   # yangi zakazlarni qo'shish
+            check_orders()    # mavjud zakazlarni tekshirish
+        except Exception as e:
+            print("Background loop error:", e)
+        await asyncio.sleep(CHECK_INTERVAL)
+
 async def main():
     # Botni yaratish
     application = ApplicationBuilder().token(BOT_TOKEN).build()
-
-    # Handler qo‘shish
     application.add_handler(CommandHandler("start", start))
 
-    # Pollingni ishga tushirish
+    # Notifierni init qilish
+    init_notifier(application, asyncio.get_event_loop(), ADMIN_ID)
+
+    # Background loopni ishga tushirish
+    asyncio.create_task(background_loop(application))
+
     print("Bot ishga tushmoqda...")
     await application.run_polling()
 
