@@ -1,22 +1,21 @@
+# app.py
 import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-from config import BOT_TOKEN
+
+from config import BOT_TOKEN  # Token config.py dan
 
 # /start komandasi
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Salom! Bot ishga tushdi ✅")
+    await update.message.reply_text("✅ Salom! Bot ishga tushdi.")
 
-async def main():
-    # Botni yaratish
-    application = ApplicationBuilder().token(BOT_TOKEN).build()
-    
-    # Handler qo‘shish
-    application.add_handler(CommandHandler("start", start))
-    
-    # Botni polling orqali ishga tushirish
-    print("Bot ishga tushdi. Ctrl+C bilan to‘xtating.")
-    await application.run_polling()
+# Telegram botni ishga tushirish
+application = ApplicationBuilder().token(BOT_TOKEN).build()
+application.add_handler(CommandHandler("start", start))
 
-if __name__ == "__main__":
-    asyncio.run(main())
+print("Bot ishga tushmoqda...")
+
+# Termux va boshqa interactive muhitlar uchun
+loop = asyncio.get_event_loop()
+loop.create_task(application.run_polling(drop_pending_updates=True))
+loop.run_forever()
