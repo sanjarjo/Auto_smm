@@ -22,9 +22,11 @@ async def scheduler_loop(application):
             # ensure_orders va check_orders sync bo'lgani uchun to_thread ishlatamiz
             await asyncio.to_thread(ensure_orders)
             await asyncio.to_thread(check_orders)
+            await ensure_orders()  # await qo'shildi
+        await check_orders()   # await qo'shildi
         except Exception as e:
             print("Scheduler xatosi:", e)
-        await asyncio.sleep(CHECK_INTERVAL)
+        await asyncio.sleep(60)
 
 async def main():
     # Botni yaratish
