@@ -1,31 +1,53 @@
+# app.py
 import asyncio
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
-    ContextTypes
+    ContextTypes,
 )
 
-from config import BOT_TOKEN, ADMIN_ID
+from config import BOT_TOKEN, ADMIN_ID, CHECK_INTERVAL
+from scheduler import ensure_orders, check_orders
 from notifier import init_notifier
-from scheduler import scheduler_loop
 
+
+# /start komandasi
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("✅ Salom! Bot ishga tushdi!")
+    await update.message.reply_text("✅ Salom! Bot to‘liq ishlayapti.")
 
-async def main():
-    application = ApplicationBuilder().token(BOT_TOKEN).build()
+
+# Background scheduler
+async def scheduler_loop():
+    while True:
+        try:
+            ensure_orders()
+            check_orders()
+        except Exception as e:
+            print("Scheduler xatosi:", e)
+        await asyncio.sleep(CHECK_INTERVAL)
+
+
+# Application ishga tushgandan keyin chaqiriladi
+async def post_init(application):
+    loop = asyncio.get_running_loop()
+    init_notifier(application, loop, ADMIN_ID)
+    application.create_task(scheduler_loop())
+
+
+def main():
+    application = (
+        ApplicationBuilder()
+        .token(BOT_TOKEN)
+        .post_init(post_init)
+        .build()
+    )
 
     application.add_handler(CommandHandler("start", start))
 
-    # notifier init
-    init_notifier(application, ADMIN_ID)
-
-    # background scheduler
-    application.create_task(scheduler_loop())
-
     print("🤖 Bot to‘liq ishga tushdi...")
-    await application.run_polling()
+    application.run_polling()
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
