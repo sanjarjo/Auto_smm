@@ -1,41 +1,22 @@
-import os
 import asyncio
-from flask import Flask, request
-from telegram import Update, Bot
+from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-
 from config import BOT_TOKEN
-
-app = Flask(__name__)
 
 # /start komandasi
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("✅ Salom! Bot webhook orqali ishlayapti.")
+    await update.message.reply_text("Salom! Bot ishga tushdi ✅")
 
-# Botni yaratish va handler qo'shish
-application = ApplicationBuilder().token(BOT_TOKEN).build()
-application.add_handler(CommandHandler("start", start))
-
-# Webhook route
-@app.route(f"/webhook/{BOT_TOKEN}", methods=["POST"])
-def webhook():
-    """Telegram POST requestlarini qabul qiladi"""
-    try:
-        data = request.get_json(force=True)
-        update = Update.de_json(data, application.bot)
-
-        # asyncio run ishlatib synchronous tarzda update ni process qilamiz
-        asyncio.run(application.process_update(update))
-        return "OK"
-    except Exception as e:
-        print("Webhook error:", e)
-        return "Error", 500
-
-# Health check route
-@app.route("/")
-def index():
-    return "Bot is running!"
+async def main():
+    # Botni yaratish
+    application = ApplicationBuilder().token(BOT_TOKEN).build()
+    
+    # Handler qo‘shish
+    application.add_handler(CommandHandler("start", start))
+    
+    # Botni polling orqali ishga tushirish
+    print("Bot ishga tushdi. Ctrl+C bilan to‘xtating.")
+    await application.run_polling()
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    asyncio.run(main())
