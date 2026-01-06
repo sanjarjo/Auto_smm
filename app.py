@@ -1,4 +1,5 @@
 # app.py
+import nest_asyncio
 import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
@@ -6,7 +7,10 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 # Tokenni config.py dan import qilamiz
 from config import BOT_TOKEN
 
-# Telegram /start komandasi
+# nest_asyncio bilan mavjud event loop ustida ishlashga ruxsat beramiz
+nest_asyncio.apply()
+
+# /start komandasi
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ Salom! Bot ishga tushdi!")
 
@@ -22,7 +26,6 @@ async def main():
     await application.run_polling()
 
 if __name__ == "__main__":
-    # Termux va Python 3.12 uchun asyncni to‘g‘ri ishga tushiramiz
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
