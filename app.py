@@ -12,7 +12,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ Salom! Bot ishga tushdi!")
 
 
-async def background_scheduler(app):
+async def background_scheduler():
     while True:
         try:
             ensure_orders()
@@ -22,21 +22,31 @@ async def background_scheduler(app):
         await asyncio.sleep(CHECK_INTERVAL)
 
 
-def main():
-    application = ApplicationBuilder().token(BOT_TOKEN).build()
+async def post_init(application):
+    # 🔹 event loop bu yerda ALLAQACHON ishlayapti
+    loop = asyncio.get_running_loop()
 
     init_notifier(
         application=application,
-        event_loop=asyncio.get_event_loop(),
+        event_loop=loop,
         admin_id=ADMIN_ID
+    )
+
+    application.create_task(background_scheduler())
+    print("🔁 Background scheduler ishga tushdi")
+
+
+def main():
+    application = (
+        ApplicationBuilder()
+        .token(BOT_TOKEN)
+        .post_init(post_init)  # 👈 ENG MUHIM QATOR
+        .build()
     )
 
     application.add_handler(CommandHandler("start", start))
 
-    # background task
-    application.create_task(background_scheduler(application))
-
-    print("🤖 Bot to‘liq ishga tushdi (event loop xatosiz)")
+    print("🤖 Bot to‘liq ishga tushdi (loop xatosiz)")
     application.run_polling()
 
 
