@@ -1,18 +1,18 @@
 import os
 from flask import Flask, request
-from telegram import Update, Bot
+from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import asyncio
 
-from config import BOT_TOKEN  # config.py ichida: BOT_TOKEN = "YOUR_BOT_TOKEN"
+from config import BOT_TOKEN
 
 app = Flask(__name__)
 
-# Telegram /start komandasi
+# /start komandasi
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ Salom! Bot webhook orqali ishlayapti.")
 
-# Botni ishga tushiramiz
+# Botni yaratish va handler qo'shish
 application = ApplicationBuilder().token(BOT_TOKEN).build()
 application.add_handler(CommandHandler("start", start))
 
@@ -24,13 +24,10 @@ def webhook():
     update = Update.de_json(data, application.bot)
 
     # Synchronous tarzda update ni ishlatish
-    try:
-        asyncio.run(application.process_update(update))
-    except Exception as e:
-        print("Webhook processing error:", e)
-    return "ok"
+    asyncio.run(application.process_update(update))
+    return "OK"
 
-# Oddiy health check route
+# Health check route
 @app.route("/")
 def index():
     return "Bot is running!"
